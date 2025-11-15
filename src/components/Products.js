@@ -22,5 +22,21 @@ export const productos = [
     monto: "Desde $50.000.000",
     plazo: "Hasta 240 meses",
     img: "/src/assets/logo.png"
+  },
+  {
+    nombre: "Crédito Educativo",
+    descripcion: "Financia estudios técnicos, universitarios o posgrados.",
+    tasa: "8.2% anual",
+    monto: "$2.000.000 - $40.000.000",
+    plazo: "Hasta 84 meses",
+    img: "/src/assets/logo.png"
+  },
+  {
+    nombre: "Crédito para Negocios",
+    descripcion: "Impulsa tu emprendimiento o expande tu empresa.",
+    tasa: "10.5% anual",
+    monto: "$5.000.000 - $150.000.000",
+    plazo: "Hasta 120 meses",
+    img: "/src/assets/logo.png"
   }
 ];

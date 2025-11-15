@@ -2,8 +2,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import SolicitarCredito from "./pages/SolicitarCredito";
-
 import Navbar from "./components/Navbar";
+import Simulador from "./pages/Simulador";
 
 export default function App() {
   return (
