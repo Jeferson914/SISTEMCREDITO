@@ -1,4 +1,4 @@
-import { productos } from "../data/Products";
+import { productos } from "../components/Products";
 import ProductCard from "../components/ProductCard";
 import Hero from "../components/Hero";
 
