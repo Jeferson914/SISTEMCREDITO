@@ -37,12 +37,13 @@ export default function ProductCard({ producto }) {
       </div>
 
       {/* Botón CTA */}
-      <Link
-        to="/simulador"
-        className="block w-full text-center bg-[#003366] text-white py-3 rounded-xl font-medium hover:bg-[#004a88] transition-all shadow-md hover:shadow-lg"
+     <Link
+      to={`/simulador/${encodeURIComponent(producto.nombre)}`}
+      className="block w-full text-center bg-[#003366] text-white py-3 rounded-xl font-medium hover:bg-[#004a88] transition-all shadow-md hover:shadow-lg"
       >
-        Simular Crédito
+      Simular Crédito
       </Link>
+
     </div>
   );
 }
