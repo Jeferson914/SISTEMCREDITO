@@ -4,7 +4,7 @@ import Home from "./pages/Home";
 import SolicitarCredito from "./pages/SolicitarCredito";
 import Navbar from "./components/Navbar";
 import Simulador from "./pages/Simulador";
-import FormularioSimulacion from "./components/FormularioSimulacion";
+import FormularioSimulacion from "./pages/FormularioSimulacion";
 
 export default function App() {
   return (
