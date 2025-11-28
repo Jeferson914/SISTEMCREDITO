@@ -5,7 +5,7 @@ export const productos = [
     tasa: "12% anual",
     monto: "$1.000.000 - $30.000.000",
     plazo: "Hasta 60 meses",
-    img: "/src/assets/logo.png"
+    img: "/src/assets/images/libre.png"
   },
   {
     nombre: "Crédito Vehicular",
@@ -13,7 +13,7 @@ export const productos = [
     tasa: "9% anual",
     monto: "$5.000.000 - $100.000.000",
     plazo: "Hasta 72 meses",
-    img: "/src/assets/logo.png"
+    img: "/src/assets/images/vehiculo.jpg"
   },
   {
     nombre: "Crédito Hipotecario",
@@ -21,7 +21,7 @@ export const productos = [
     tasa: "7.5% anual",
     monto: "Desde $50.000.000",
     plazo: "Hasta 240 meses",
-    img: "/src/assets/logo.png"
+    img: "/src/assets/images/casa.png"
   },
   {
     nombre: "Crédito Educativo",
@@ -29,7 +29,7 @@ export const productos = [
     tasa: "8.2% anual",
     monto: "$2.000.000 - $40.000.000",
     plazo: "Hasta 84 meses",
-    img: "/src/assets/logo.png"
+    img: "/src/assets/images/educativo.png"
   },
   {
     nombre: "Crédito para Negocios",
@@ -37,6 +37,6 @@ export const productos = [
     tasa: "10.5% anual",
     monto: "$5.000.000 - $150.000.000",
     plazo: "Hasta 120 meses",
-    img: "/src/assets/logo.png"
+    img: "/src/assets/images/negocio.png"
   }
 ];

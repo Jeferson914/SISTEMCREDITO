@@ -9,7 +9,7 @@ export default function ProductCard({ producto }) {
         <img
           src={producto.img}
           alt={producto.nombre}
-          className="w-20 h-20 object-contain opacity-90"
+          className="w-30 h-30 object-contain opacity-90"
         />
       </div>
 
