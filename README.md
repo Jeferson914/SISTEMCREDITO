@@ -1,16 +1,66 @@
-# React + Vite
+# 💳 SistemCredito — Simulador y Solicitud de Créditos
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+SistemCredito es una aplicación web desarrollada en **React + Tailwind CSS**, que permite a los usuarios:
 
-Currently, two official plugins are available:
+- Consultar diferentes tipos de créditos.
+- Filtrar y ordenar productos financieros.
+- Simular cuotas mensuales según monto, tasa e interés.
+- Diligenciar un formulario funcional de solicitud.
+- Validar datos en tiempo real.
+- Visualizar un resumen automático antes de enviar la información.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Este proyecto fue desarrollado como actividad académica.
 
-## React Compiler
+---
 
-The React Compiler is currently not compatible with SWC. See [this issue](https://github.com/vitejs/vite-plugin-react/issues/428) for tracking the progress.
+## 🚀 Tecnologías utilizadas
 
-## Expanding the ESLint configuration
+- **React 18**
+- **React Router DOM**
+- **Tailwind CSS**
+- **JavaScript**
+- **Vite** (opcional según configuración)
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+---
+
+## 📂 Funcionalidades principales
+
+### 🔍 Simulador de Crédito
+- Búsqueda por nombre de crédito.
+- Filtro por rangos de monto.
+- Orden por tasa de interés (menor a mayor / mayor a menor).
+- Tarjetas dinámicas con información del producto.
+- Navegación a una página para simular cada producto.
+
+### 🧮 Formulario de Simulación
+- Captura de datos personales y financieros con `useState`.
+- Validaciones en tiempo real.
+- Cálculo automático de cuota mensual usando el sistema francés.
+- Resumen dinámico con:
+  - Cuota mensual estimada
+  - Tasa aplicada
+  - Plazo seleccionado
+- Mensaje de éxito al enviar la solicitud.
+- Limpieza automática del formulario.
+- Solicitudes almacenadas temporalmente en memoria.
+
+### 📄 Página de Solicitud General
+- Formulario independiente.
+- Campos básicos: nombre, cedula, correo, monto, plazo, ingresos.
+- Validaciones básicas.
+- Simulación previa a enviar.
+
+### 🦶 Footer
+- Navegación rápida.
+- Enlaces internos con React Router.
+- Información de contacto.
+- Diseño limpio y responsivo.
+
+---
+
+## 📦 Instalación y ejecución
+
+1. Clonar el repositorio:
+
+```bash
+git clone https://github.com/tu-usuario/sistemcredito.git
