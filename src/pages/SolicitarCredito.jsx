@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { db } from "../firebase";
+import { collection, addDoc } from "firebase/firestore";
 
 export default function SolicitarCredito() {
   const [form, setForm] = useState({
@@ -18,31 +20,23 @@ export default function SolicitarCredito() {
   const [cuota, setCuota] = useState(null);
   const [success, setSuccess] = useState("");
 
-  // Tasas simuladas por tipo de crédito
   const tasas = {
-    "Libre inversión": 0.018, // 1.8% mensual
+    "Libre inversión": 0.018,
     Vehículo: 0.012,
     Hipotecario: 0.009,
   };
 
-  // ⭐ VALIDACIÓN EN TIEMPO REAL
+  // VALIDACIÓN
   const validate = (name, value) => {
     let msg = "";
-
     if (!value) msg = "Este campo es obligatorio.";
     if (name === "correo" && value && !/\S+@\S+\.\S+/.test(value))
       msg = "Correo no válido.";
-    if (
-      ["monto", "plazo", "ingresos"].includes(name) &&
-      value &&
-      isNaN(value)
-    )
+    if (["monto", "plazo", "ingresos"].includes(name) && value && isNaN(value))
       msg = "Debe ser un número válido.";
-
     setErrors((prev) => ({ ...prev, [name]: msg }));
   };
 
-  // ⭐ MANEJO DE CAMBIOS
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     const val = type === "checkbox" ? checked : value;
@@ -50,7 +44,6 @@ export default function SolicitarCredito() {
     setForm((prev) => ({ ...prev, [name]: val }));
     validate(name, val);
 
-    // Recalcular cuota cuando cambien monto o plazo
     if (name === "monto" || name === "plazo" || name === "tipo") {
       calcularCuota({
         ...form,
@@ -59,7 +52,7 @@ export default function SolicitarCredito() {
     }
   };
 
-  // ⭐ CÁLCULO REAL DE CUOTA (Fórmula de préstamo francés)
+  // CÁLCULO CUOTA
   const calcularCuota = (data) => {
     const tasa = tasas[data.tipo];
     if (!tasa || !data.monto || !data.plazo) {
@@ -72,11 +65,10 @@ export default function SolicitarCredito() {
     const n = Number(data.plazo);
 
     const cuotaMensual = (P * i) / (1 - Math.pow(1 + i, -n));
-
     setCuota(cuotaMensual.toFixed(2));
   };
 
-  // ⭐ VALIDACIÓN COMPLETA ANTES DE ENVIAR
+  // VALIDAR FORM
   const isValidForm = () => {
     for (let key in form) {
       if (!form[key] && key !== "acepta") return false;
@@ -86,9 +78,10 @@ export default function SolicitarCredito() {
     return true;
   };
 
-  // ⭐ ENVIAR FORMULARIO
-  const handleSubmit = (e) => {
+  // ENVIAR FORMULARIO (Ahora con backend)
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!isValidForm()) {
       alert("Por favor completa todos los campos correctamente.");
       return;
@@ -100,11 +93,19 @@ export default function SolicitarCredito() {
       fecha: new Date().toLocaleString(),
     };
 
+    // 🔥 GUARDAR EN FIREBASE
+    try {
+      await addDoc(collection(db, "solicitudes"), nuevaSolicitud);
+    } catch (error) {
+      console.error("Error guardando solicitud:", error);
+      alert("Hubo un error guardando la solicitud.");
+      return;
+    }
+
     setSolicitudes((prev) => [...prev, nuevaSolicitud]);
+    setSuccess("Solicitud enviada y guardada en el sistema ✔");
 
-    setSuccess("Solicitud enviada exitosamente ✔");
-
-    // Limpiar formulario
+    // LIMPIAR FORM
     setForm({
       nombre: "",
       documento: "",
@@ -118,11 +119,10 @@ export default function SolicitarCredito() {
     });
 
     setCuota(null);
-
     setTimeout(() => setSuccess(""), 4000);
   };
 
-  return (
+return (
     <section className="min-h-screen bg-gray-100 py-12 px-6">
       <div className="max-w-3xl mx-auto bg-white shadow-xl border border-gray-200 p-10 rounded-2xl">
 
