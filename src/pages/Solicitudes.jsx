@@ -64,10 +64,14 @@ export default function ListaSolicitudes() {
             </div>
             {/*DETALLES DESPLEGABLES */}
             {abierto === s.id && (
-            <div className="">
+            <div className="mt-4 border-t pt-4">
               <p><strong>Monto:</strong> ${s.monto}</p>
               <p><strong>Cuota:</strong> ${s.cuotaEstimada}</p>
               <p><strong>Fecha:</strong> {s.fecha}</p>
+              <p><strong>Documento:</strong> {s.documento}</p>
+              <p><strong>Correo:</strong> {s.correo} </p>
+              <p><strong>Telefono:</strong>{s.telefono} </p>
+              <p><strong>Ingresos:</strong> {s.ingresos} </p>
             </div>
             )}
             </li>
