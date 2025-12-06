@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { db } from "../firebase";
-import { collection, addDoc } from "firebase/firestore";
+import { db } from "../firebase/firebaseConfig";
+import { collection,addDoc } from "firebase/firestore";
 
 export default function SolicitarCredito() {
   const [form, setForm] = useState({
