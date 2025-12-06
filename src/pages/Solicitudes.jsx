@@ -1,25 +1,51 @@
-import { useEffect, useState } from "react";
-import { collection, getDocs } from "firebase/firestore";
+import { useEffect, useState, useCallback } from "react";
+import { collection, getDocs, query, where, orderBy } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 
 export default function ListaSolicitudes() {
   const [solicitudes, setSolicitudes] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Estados para filtros
+  const [filtroCorreo, setFiltroCorreo] = useState("");
+  const [orden, setOrden] = useState("fechaDesc");
+
   const [abierto, setAbierto] = useState(null);
 
   const toggle = (id) => {
     setAbierto(abierto === id ? null : id);
-  }
+  };
 
+  // 🔥 Obtener solicitudes con filtros dinámicos
+  const obtenerSolicitudes = useCallback(async () => {
+    setLoading(true);
 
-  const obtenerSolicitudes = async () => {
     try {
-      const querySnapshot = await getDocs(collection(db, "solicitudes"));
-      const lista = [];
+      let consulta = collection(db, "solicitudes");
+      let filtros = [];
 
-      querySnapshot.forEach((doc) => {
-        lista.push({ id: doc.id, ...doc.data() });
-      });
+      // FILTRO POR CORREO (reactivo)
+      if (filtroCorreo.trim() !== "") {
+        filtros.push(where("correo", ">=", filtroCorreo));
+        filtros.push(where("correo", "<=", filtroCorreo + "\uf8ff"));
+      }
+
+      // ORDENAMIENTO
+      if (orden === "fechaDesc") {
+        filtros.push(orderBy("fecha", "desc"));
+      } else if (orden === "fechaAsc") {
+        filtros.push(orderBy("fecha", "asc"));
+      } else if (orden === "montoDesc") {
+        filtros.push(orderBy("monto", "desc"));
+      } else if (orden === "montoAsc") {
+        filtros.push(orderBy("monto", "asc"));
+      }
+
+      const q = query(consulta, ...filtros);
+      const snapshot = await getDocs(q);
+
+      let lista = [];
+      snapshot.forEach((doc) => lista.push({ id: doc.id, ...doc.data() }));
 
       setSolicitudes(lista);
     } catch (error) {
@@ -27,11 +53,16 @@ export default function ListaSolicitudes() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filtroCorreo, orden]);
 
+  // Se ejecuta al cargar y cuando cambia algún filtro
   useEffect(() => {
-    obtenerSolicitudes();
-  }, []);
+    const delay = setTimeout(() => {
+      obtenerSolicitudes();
+    }, 400); // ⏳ Anti-spam de consultas
+
+    return () => clearTimeout(delay);
+  }, [obtenerSolicitudes]);
 
   if (loading) return <p className="text-center mt-10">Cargando...</p>;
 
@@ -42,37 +73,60 @@ export default function ListaSolicitudes() {
           Solicitudes Registradas
         </h1>
 
+        {/* 🔍 FILTROS */}
+        <div className="mb-6 flex flex-col md:flex-row gap-4">
+          <input
+            type="text"
+            placeholder="Filtrar por correo..."
+            className="border p-2 rounded w-full"
+            value={filtroCorreo}
+            onChange={(e) => setFiltroCorreo(e.target.value)}
+          />
+
+          <select
+            className="border p-2 rounded"
+            value={orden}
+            onChange={(e) => setOrden(e.target.value)}
+          >
+            <option value="fechaDesc">Fecha (más reciente)</option>
+            <option value="fechaAsc">Fecha (más antigua)</option>
+            <option value="montoDesc">Monto (mayor a menor)</option>
+            <option value="montoAsc">Monto (menor a mayor)</option>
+          </select>
+        </div>
+
         {solicitudes.length === 0 && (
-          <p className="text-center text-gray-600">No hay solicitudes aún.</p>
+          <p className="text-center text-gray-600">No hay solicitudes.</p>
         )}
 
         <ul className="space-y-4">
           {solicitudes.map((s) => (
-            <li key={s.id} className="border p-5 rounded-xl bg-gray-50 shadow transition">
-              {/*Encabezado*/}
-            <div className="flex justify-between items-center">
-              <div>
-              <p><strong>Nombre:</strong> {s.nombre}</p>
-              <p><strong>Tipo:</strong> {s.tipo}</p>
-            </div>
-            
-            <button className=""
-            onClick={() => toggle(s.id)}>
-              {abierto === s.id ? "⬆️" : "⬇️"}
-            </button>
-            </div>
-            {/*DETALLES DESPLEGABLES */}
-            {abierto === s.id && (
-            <div className="mt-4 border-t pt-4">
-              <p><strong>Monto:</strong> ${s.monto}</p>
-              <p><strong>Cuota:</strong> ${s.cuotaEstimada}</p>
-              <p><strong>Fecha:</strong> {s.fecha}</p>
-              <p><strong>Documento:</strong> {s.documento}</p>
-              <p><strong>Correo:</strong> {s.correo} </p>
-              <p><strong>Telefono:</strong>{s.telefono} </p>
-              <p><strong>Ingresos:</strong> {s.ingresos} </p>
-            </div>
-            )}
+            <li
+              key={s.id}
+              className="border p-5 rounded-xl bg-gray-50 shadow transition"
+            >
+              <div className="flex justify-between items-center">
+                <div>
+                  <p><strong>Nombre:</strong> {s.nombre}</p>
+                  <p><strong>Tipo:</strong> {s.tipo}</p>
+                </div>
+
+                <button onClick={() => toggle(s.id)}>
+                  {abierto === s.id ? "⬆️" : "⬇️"}
+                </button>
+              </div>
+
+              {abierto === s.id && (
+                <div className="mt-4 border-t pt-4">
+                  <p><strong>Monto:</strong> ${s.monto}</p>
+                  <p><strong>Cuota:</strong> ${s.cuotaEstimada}</p>
+                  <p><strong>Fecha:</strong> {s.fecha}</p>
+                  <p><strong>Documento:</strong> {s.documento}</p>
+                  <p><strong>Correo:</strong> {s.correo}</p>
+                  <p><strong>Teléfono:</strong> {s.telefono}</p>
+                  <p><strong>Ingresos:</strong> {s.ingresos}</p>
+                </div>
+              )}
             </li>
           ))}
         </ul>
