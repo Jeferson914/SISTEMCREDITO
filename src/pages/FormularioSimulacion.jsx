@@ -1,200 +1,98 @@
-import { useParams } from "react-router-dom";
 import { useState } from "react";
-import { productos } from "../components/Products";
 
-// Fórmula de cuota (sistema francés)
-function calcularCuota(monto, tasaAnual, plazoMeses) {
-  const i = tasaAnual / 100 / 12; // tasa mensual
-  if (i === 0) return monto / plazoMeses;
-  return (monto * i) / (1 - Math.pow(1 + i, -plazoMeses));
-}
+export default function FormularioSimulacion({ productos }) {
+  const [busqueda, setBusqueda] = useState("");
+  const [rango, setRango] = useState("");
+  const [resultados, setResultados] = useState([]);
 
-export default function FormularioSimulacion() {
-  const { producto } = useParams();
+  const rangos = [
+    { id: "1", label: "Hasta $1,000", min: 0, max: 1000 },
+    { id: "2", label: "$1,000 - $5,000", min: 1000, max: 5000 },
+    { id: "3", label: "Más de $5,000", min: 5000, max: Infinity },
+  ];
 
-  const productoSeleccionado = productos.find(
-    (p) => p.nombre === decodeURIComponent(producto)
-  );
+  const simular = () => {
+    let filtrados = productos;
 
-  // ================================
-  // ESTADOS DEL FORMULARIO
-  // ================================
-  const [nombre, setNombre] = useState("");
-  const [cedula, setCedula] = useState("");
-  const [correo, setCorreo] = useState("");
-  const [monto, setMonto] = useState("");
-  const [plazo, setPlazo] = useState("");
+    // FILTRO por nombre
+    if (busqueda.trim() !== "") {
+      filtrados = filtrados.filter((p) =>
+        p.nombre.toLowerCase().includes(busqueda.toLowerCase())
+      );
+    }
 
-  const [errores, setErrores] = useState({});
-  const [solicitudes, setSolicitudes] = useState([]);
-  const [exito, setExito] = useState(false);
+    // FILTRO por rango predefinido
+    if (rango !== "") {
+      const r = rangos.find((x) => x.id === rango);
+      filtrados = filtrados.filter(
+        (p) => p.monto >= r.min && p.monto <= r.max
+      );
+    }
 
-  if (!productoSeleccionado) {
-    return <p className="text-center mt-20">Producto no encontrado.</p>;
-  }
-
-  // ================================
-  // VALIDACIONES EN TIEMPO REAL
-  // ================================
-  const validar = () => {
-    const nuevosErrores = {};
-
-    if (!nombre.trim()) nuevosErrores.nombre = "El nombre es obligatorio";
-    if (!cedula.trim()) nuevosErrores.cedula = "La cédula es obligatoria";
-    if (!correo.includes("@")) nuevosErrores.correo = "Correo inválido";
-
-    const montoNum = Number(monto);
-    if (isNaN(montoNum) || montoNum <= 0)
-      nuevosErrores.monto = "Monto inválido";
-
-    const plazoNum = Number(plazo);
-    if (isNaN(plazoNum) || plazoNum <= 0)
-      nuevosErrores.plazo = "Plazo inválido";
-
-    setErrores(nuevosErrores);
-    return Object.keys(nuevosErrores).length === 0;
-  };
-
-  // ================================
-  // CALCULAR CUOTA AUTOMÁTICA
-  // ================================
-  const tasaNumerica = Number(
-    productoSeleccionado.tasa.replace(/[^0-9.]/g, "")
-  );
-
-  const cuota =
-    monto && plazo
-      ? calcularCuota(Number(monto), tasaNumerica, Number(plazo))
-      : 0;
-
-  // ================================
-  // ENVIAR FORMULARIO
-  // ================================
-  const enviar = (e) => {
-    e.preventDefault();
-
-    if (!validar()) return;
-
-    const nuevaSolicitud = {
-      nombre,
-      cedula,
-      correo,
-      monto,
-      plazo,
-      cuota,
-      producto: productoSeleccionado.nombre,
-      fecha: new Date().toLocaleString(),
-    };
-
-    // Guardar en memoria
-    setSolicitudes([...solicitudes, nuevaSolicitud]);
-
-    // Mensaje de éxito
-    setExito(true);
-
-    // Limpiar formulario
-    setNombre("");
-    setCedula("");
-    setCorreo("");
-    setMonto("");
-    setPlazo("");
-
-    // Quitar mensaje de éxito después de 3s
-    setTimeout(() => setExito(false), 3000);
+    setResultados(filtrados);
   };
 
   return (
-    <section className="min-h-screen bg-gray-100 px-6 py-12">
-      <div className="max-w-3xl mx-auto bg-white shadow-xl border rounded-2xl p-10">
+    <section className="max-w-3xl mx-auto bg-white shadow-xl p-8 rounded-2xl mt-10">
+      <h2 className="text-2xl font-bold text-blue-700 mb-6 text-center">
+        Simulador de Crédito
+      </h2>
 
-        <h1 className="text-3xl font-bold text-blue-700 mb-6">
-          Solicitar Crédito: {productoSeleccionado.nombre}
-        </h1>
+      {/* BUSCADOR */}
+      <div className="mb-6">
+        <label className="block font-semibold mb-1">Buscar por nombre:</label>
+        <input
+          type="text"
+          className="w-full border p-3 rounded-lg"
+          placeholder="Ej: Crédito Rápido"
+          value={busqueda}
+          onChange={(e) => setBusqueda(e.target.value)}
+        />
+      </div>
 
-        {/* Mensaje de éxito */}
-        {exito && (
-          <div className="mb-6 bg-green-100 text-green-700 py-3 px-4 rounded-xl">
-            ✔ ¡Solicitud enviada exitosamente!
-          </div>
+      {/* RANGOS */}
+      <div className="mb-6">
+        <label className="block font-semibold mb-1">Filtrar por rango:</label>
+        <select
+          className="w-full border p-3 rounded-lg"
+          value={rango}
+          onChange={(e) => setRango(e.target.value)}
+        >
+          <option value="">Todos</option>
+          {rangos.map((r) => (
+            <option key={r.id} value={r.id}>{r.label}</option>
+          ))}
+        </select>
+      </div>
+
+      {/* BOTÓN */}
+      <button
+        onClick={simular}
+        className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700"
+      >
+        Buscar créditos
+      </button>
+
+      {/* RESULTADOS */}
+      <div className="mt-8">
+        <h3 className="text-xl font-bold text-gray-700 mb-4">Resultados:</h3>
+
+        {resultados.length === 0 ? (
+          <p className="text-gray-600">No hay resultados.</p>
+        ) : (
+          <ul className="space-y-4">
+            {resultados.map((p) => (
+              <li
+                key={p.id}
+                className="border p-5 rounded-xl bg-gray-50 shadow"
+              >
+                <p><strong>Producto:</strong> {p.nombre}</p>
+                <p><strong>Monto:</strong> ${p.monto}</p>
+                <p><strong>Tasa:</strong> {p.tasa}%</p>
+              </li>
+            ))}
+          </ul>
         )}
-
-        {/* FORMULARIO */}
-        <form onSubmit={enviar} className="space-y-6">
-
-          <div>
-            <label className="font-medium">Nombre completo</label>
-            <input
-              type="text"
-              className="w-full border rounded-xl px-4 py-3 mt-1"
-              value={nombre}
-              onChange={(e) => setNombre(e.target.value)}
-            />
-            {errores.nombre && <p className="text-red-600 text-sm">{errores.nombre}</p>}
-          </div>
-
-          <div>
-            <label className="font-medium">Cédula</label>
-            <input
-              type="text"
-              className="w-full border rounded-xl px-4 py-3 mt-1"
-              value={cedula}
-              onChange={(e) => setCedula(e.target.value)}
-            />
-            {errores.cedula && <p className="text-red-600 text-sm">{errores.cedula}</p>}
-          </div>
-
-          <div>
-            <label className="font-medium">Correo electrónico</label>
-            <input
-              type="email"
-              className="w-full border rounded-xl px-4 py-3 mt-1"
-              value={correo}
-              onChange={(e) => setCorreo(e.target.value)}
-            />
-            {errores.correo && <p className="text-red-600 text-sm">{errores.correo}</p>}
-          </div>
-
-          <div>
-            <label className="font-medium">Monto solicitado</label>
-            <input
-              type="number"
-              className="w-full border rounded-xl px-4 py-3 mt-1"
-              value={monto}
-              onChange={(e) => setMonto(e.target.value)}
-            />
-            {errores.monto && <p className="text-red-600 text-sm">{errores.monto}</p>}
-          </div>
-
-          <div>
-            <label className="font-medium">Plazo (meses)</label>
-            <input
-              type="number"
-              className="w-full border rounded-xl px-4 py-3 mt-1"
-              value={plazo}
-              onChange={(e) => setPlazo(e.target.value)}
-            />
-            {errores.plazo && <p className="text-red-600 text-sm">{errores.plazo}</p>}
-          </div>
-
-          {/* RESUMEN DINÁMICO */}
-          {(monto && plazo) && (
-            <div className="bg-gray-50 border rounded-xl p-4 mt-4">
-              <h3 className="font-semibold text-blue-700 mb-2">Resumen estimado</h3>
-              <p><strong>Cuota mensual:</strong> ${cuota.toLocaleString()}</p>
-              <p><strong>Tasa:</strong> {productoSeleccionado.tasa}</p>
-              <p><strong>Plazo:</strong> {plazo} meses</p>
-            </div>
-          )}
-
-          <button
-            type="submit"
-            className="w-full bg-blue-700 hover:bg-blue-800 text-white py-3 rounded-xl font-medium shadow-md"
-          >
-            Enviar solicitud
-          </button>
-
-        </form>
-
       </div>
     </section>
   );

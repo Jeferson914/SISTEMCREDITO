@@ -11,7 +11,6 @@ export default function ListaSolicitudes() {
     setAbierto(abierto === id ? null : id);
   }
 
-  
 
   const obtenerSolicitudes = async () => {
     try {
