@@ -1,10 +1,17 @@
 import { useEffect, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
-import { db } from "../firebaseConfig";
+import { db } from "../firebase/firebaseConfig";
 
 export default function ListaSolicitudes() {
   const [solicitudes, setSolicitudes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [abierto, setAbierto] = useState(null);
+
+  const toggle = (id) => {
+    setAbierto(abierto === id ? null : id);
+  }
+
+  
 
   const obtenerSolicitudes = async () => {
     try {
@@ -42,12 +49,27 @@ export default function ListaSolicitudes() {
 
         <ul className="space-y-4">
           {solicitudes.map((s) => (
-            <li key={s.id} className="border p-5 rounded-xl bg-gray-50 shadow">
+            <li key={s.id} className="border p-5 rounded-xl bg-gray-50 shadow transition">
+              {/*Encabezado*/}
+            <div className="flex justify-between items-center">
+              <div>
               <p><strong>Nombre:</strong> {s.nombre}</p>
               <p><strong>Tipo:</strong> {s.tipo}</p>
+            </div>
+            
+            <button className=""
+            onClick={() => toggle(s.id)}>
+              {abierto === s.id ? "⬆️" : "⬇️"}
+            </button>
+            </div>
+            {/*DETALLES DESPLEGABLES */}
+            {abierto === s.id && (
+            <div className="">
               <p><strong>Monto:</strong> ${s.monto}</p>
               <p><strong>Cuota:</strong> ${s.cuotaEstimada}</p>
               <p><strong>Fecha:</strong> {s.fecha}</p>
+            </div>
+            )}
             </li>
           ))}
         </ul>

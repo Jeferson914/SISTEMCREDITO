@@ -15,12 +15,12 @@ export default function Navbar() {
 
 
         {/* Opciones */}
-        <ul className="flex gap-10 text-lg font-medium">
+        <ul className="flex  gap-10 text-lg font-medium">
 
           <li>
             <Link
               to="/"
-              className="flex items-center gap-2 text-gray-700 hover:text-[#004c99] transition"
+              className="flex-auto items-center gap-2 text-gray-700 hover:text-[#004c99] transition"
             >
               <Home size={20} strokeWidth={2} />
               Home
@@ -30,7 +30,7 @@ export default function Navbar() {
           <li>
             <Link
               to="/simulador"
-              className="flex items-center gap-2 text-gray-700 hover:text-[#004c99] transition"
+              className="flex-auto items-center gap-2 text-gray-700 hover:text-[#004c99] transition"
             >
               <Calculator size={20} strokeWidth={2} />
               Simulador
@@ -39,13 +39,23 @@ export default function Navbar() {
 
           <li>
             <Link
-              to="/solicitud"
-              className="flex items-center gap-2 text-gray-700 hover:text-[#004c99] transition"
+              to="/solicitudCredito"
+              className="flex-auto items-center gap-2 text-gray-700 hover:text-[#004c99] transition"
             >
               <FileEdit size={20} strokeWidth={2} />
               Formulario
             </Link>
           </li>
+
+          <li>
+            <Link
+              to="/solicitud"
+              className="flex-auto items-center gap-2 text-gray-700 hover:text-[#004c99] transition"
+            >
+              <FileEdit size={20} strokeWidth={2} />
+              Solicitudes
+            </Link>
+          </li>      
 
         </ul>
 

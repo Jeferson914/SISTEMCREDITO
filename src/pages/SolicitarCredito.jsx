@@ -24,6 +24,8 @@ export default function SolicitarCredito() {
     "Libre inversión": 0.018,
     Vehículo: 0.012,
     Hipotecario: 0.009,
+    Educativo: 0.011,
+    Negocio: 0.012,
   };
 
   // VALIDACIÓN
@@ -221,6 +223,8 @@ return (
                   <option>Libre inversión</option>
                   <option>Vehículo</option>
                   <option>Hipotecario</option>
+                  <option>Educativo</option>
+                  <option>Negocio</option>
                 </select>
                 {errors.tipo && (
                   <p className="text-red-500 text-sm">{errors.tipo}</p>

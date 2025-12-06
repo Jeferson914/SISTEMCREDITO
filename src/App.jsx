@@ -5,6 +5,7 @@ import SolicitarCredito from "./pages/SolicitarCredito";
 import Navbar from "./components/Navbar";
 import Simulador from "./pages/Simulador";
 import FormularioSimulacion from "./pages/FormularioSimulacion";
+import ListaSolicitudes from "./pages/Solicitudes";
 
 export default function App() {
   return (
@@ -19,7 +20,8 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/simulador" element={<Simulador />} />
-            <Route path="/solicitud" element={<SolicitarCredito />} />
+            <Route path="/solicitudCredito" element={<SolicitarCredito />} />
+            <Route path="/solicitud" element={<ListaSolicitudes/>} />
             <Route path="/simulador/:producto" element={<FormularioSimulacion />} />
 
           </Routes>
