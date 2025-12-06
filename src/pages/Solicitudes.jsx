@@ -5,6 +5,7 @@ import { db } from "../firebase/firebaseConfig";
 export default function ListaSolicitudes() {
   const [solicitudes, setSolicitudes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [filtroTipo, setFiltroTipo] = useState("")
 
   // Estados para filtros
   const [filtroCorreo, setFiltroCorreo] = useState("");
@@ -93,6 +94,19 @@ export default function ListaSolicitudes() {
             <option value="montoDesc">Monto (mayor a menor)</option>
             <option value="montoAsc">Monto (menor a mayor)</option>
           </select>
+
+          <select
+           className="border p-2 rounded"
+            value={filtroTipo}
+            onChange={(e) => setFiltroTipo(e.target.value)}
+            >
+            <option value="">Todos los tipos</option>
+            <option value="consumo">Consumo</option>
+            <option value="hipotecario">Hipotecario</option>
+            <option value="vehicular">Vehicular</option>
+            <option value="tarjeta">Tarjeta de Crédito</option>
+          </select>
+
         </div>
 
         {solicitudes.length === 0 && (
