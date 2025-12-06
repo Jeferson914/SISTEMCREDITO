@@ -5,11 +5,12 @@ import { db } from "../firebase/firebaseConfig";
 export default function ListaSolicitudes() {
   const [solicitudes, setSolicitudes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filtroTipo, setFiltroTipo] = useState("")
+  
 
   // Estados para filtros
   const [filtroCorreo, setFiltroCorreo] = useState("");
   const [orden, setOrden] = useState("fechaDesc");
+  const [filtroTipo, setFiltroTipo] = useState("")
 
   const [abierto, setAbierto] = useState(null);
 
@@ -42,6 +43,11 @@ export default function ListaSolicitudes() {
         filtros.push(orderBy("monto", "asc"));
       }
 
+      //FILTRO POR TIPO
+      if (filtroTipo.trim() !== ""){
+        filtros.push(where("tipo", "==", filtroTipo))
+      }
+
       const q = query(consulta, ...filtros);
       const snapshot = await getDocs(q);
 
@@ -54,7 +60,7 @@ export default function ListaSolicitudes() {
     } finally {
       setLoading(false);
     }
-  }, [filtroCorreo, orden]);
+  }, [filtroCorreo, orden, filtroTipo]);
 
   // Se ejecuta al cargar y cuando cambia algún filtro
   useEffect(() => {
@@ -106,7 +112,6 @@ export default function ListaSolicitudes() {
             <option value="vehicular">Vehicular</option>
             <option value="tarjeta">Tarjeta de Crédito</option>
           </select>
-
         </div>
 
         {solicitudes.length === 0 && (
