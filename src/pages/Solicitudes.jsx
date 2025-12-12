@@ -1,16 +1,15 @@
 import { useEffect, useState, useCallback } from "react";
-import { collection, getDocs, query, where, orderBy } from "firebase/firestore";
+import { collection, getDocs, query, where, orderBy, updateDoc, deleteDoc, doc } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 
 export default function ListaSolicitudes() {
   const [solicitudes, setSolicitudes] = useState([]);
   const [loading, setLoading] = useState(true);
-  
 
   // Estados para filtros
   const [filtroCorreo, setFiltroCorreo] = useState("");
   const [orden, setOrden] = useState("fechaDesc");
-  const [filtroTipo, setFiltroTipo] = useState("")
+  const [filtroTipo, setFiltroTipo] = useState("");
 
   const [abierto, setAbierto] = useState(null);
 
@@ -26,26 +25,22 @@ export default function ListaSolicitudes() {
       let consulta = collection(db, "solicitudes");
       let filtros = [];
 
-      // FILTRO POR CORREO (reactivo)
+      // ✔ FILTRO CORREO
       if (filtroCorreo.trim() !== "") {
         filtros.push(where("correo", ">=", filtroCorreo));
         filtros.push(where("correo", "<=", filtroCorreo + "\uf8ff"));
+        filtros.push(orderBy("correo"));
+      } else {
+        // ✔ ORDENAMIENTO SOLO SI NO HAY FILTRO CORREO
+        if (orden === "fechaDesc") filtros.push(orderBy("fecha", "desc"));
+        if (orden === "fechaAsc") filtros.push(orderBy("fecha", "asc"));
+        if (orden === "montoDesc") filtros.push(orderBy("monto", "desc"));
+        if (orden === "montoAsc") filtros.push(orderBy("monto", "asc"));
       }
 
-      // ORDENAMIENTO
-      if (orden === "fechaDesc") {
-        filtros.push(orderBy("fecha", "desc"));
-      } else if (orden === "fechaAsc") {
-        filtros.push(orderBy("fecha", "asc"));
-      } else if (orden === "montoDesc") {
-        filtros.push(orderBy("monto", "desc"));
-      } else if (orden === "montoAsc") {
-        filtros.push(orderBy("monto", "asc"));
-      }
-
-      //FILTRO POR TIPO
-      if (filtroTipo.trim() !== ""){
-        filtros.push(where("tipo", "==", filtroTipo))
+      // ✔ FILTRO TIPO
+      if (filtroTipo.trim() !== "") {
+        filtros.push(where("tipo", "==", filtroTipo));
       }
 
       const q = query(consulta, ...filtros);
@@ -62,36 +57,51 @@ export default function ListaSolicitudes() {
     }
   }, [filtroCorreo, orden, filtroTipo]);
 
-  // Se ejecuta al cargar y cuando cambia algún filtro
+  // Ejecutar cada vez que cambien filtros
   useEffect(() => {
-    const delay = setTimeout(() => {
-      obtenerSolicitudes();
-    }, 400); // ⏳ Anti-spam de consultas
-
-    return () => clearTimeout(delay);
+    obtenerSolicitudes();
   }, [obtenerSolicitudes]);
+
+  // Función para eliminar solicitud
+  const eliminarSolicitud = async (id) => {
+    try {
+      await deleteDoc(doc(db, "solicitudes", id));
+      setSolicitudes(solicitudes.filter((s) => s.id !== id));
+    } catch (error) {
+      console.error("Error al eliminar solicitud:", error);
+    }
+  };
+
+  // Función para actualizar solicitud
+  const actualizarSolicitud = async (id, datosActualizados) => {
+    try {
+      const solicitudRef = doc(db, "solicitudes", id);
+      await updateDoc(solicitudRef, datosActualizados);
+      setSolicitudes(solicitudes.map((s) => (s.id === id ? { ...s, ...datosActualizados } : s)));
+    } catch (error) {
+      console.error("Error al actualizar solicitud:", error);
+    }
+  };
 
   if (loading) return <p className="text-center mt-10">Cargando...</p>;
 
   return (
     <section className="min-h-screen bg-gray-100 p-8">
       <div className="max-w-4xl mx-auto bg-white shadow-xl p-8 rounded-xl">
-        <h1 className="text-3xl font-bold text-blue-700 mb-6 text-center">
-          Solicitudes Registradas
-        </h1>
+        <h1 className="text-3xl font-bold text-blue-700 mb-6 text-center">Solicitudes Registradas</h1>
 
         {/* 🔍 FILTROS */}
         <div className="mb-6 flex flex-col md:flex-row gap-4">
           <input
             type="text"
             placeholder="Filtrar por correo..."
-            className="border p-2 rounded w-full"
+            className="border p-2 rounded w-full focus:ring-2 focus:ring-blue-500"
             value={filtroCorreo}
             onChange={(e) => setFiltroCorreo(e.target.value)}
           />
 
           <select
-            className="border p-2 rounded"
+            className="border p-2 rounded focus:ring-2 focus:ring-blue-500"
             value={orden}
             onChange={(e) => setOrden(e.target.value)}
           >
@@ -102,10 +112,10 @@ export default function ListaSolicitudes() {
           </select>
 
           <select
-           className="border p-2 rounded"
+            className="border p-2 rounded focus:ring-2 focus:ring-blue-500"
             value={filtroTipo}
             onChange={(e) => setFiltroTipo(e.target.value)}
-            >
+          >
             <option value="">Todos los tipos</option>
             <option value="consumo">Consumo</option>
             <option value="hipotecario">Hipotecario</option>
@@ -122,28 +132,70 @@ export default function ListaSolicitudes() {
           {solicitudes.map((s) => (
             <li
               key={s.id}
-              className="border p-5 rounded-xl bg-gray-50 shadow transition"
+              className="border p-5 rounded-xl bg-white shadow-md transition transform hover:scale-105 hover:shadow-xl"
             >
               <div className="flex justify-between items-center">
                 <div>
-                  <p><strong>Nombre:</strong> {s.nombre}</p>
-                  <p><strong>Tipo:</strong> {s.tipo}</p>
+                  <p className="text-lg font-semibold text-gray-800">{s.nombre}</p>
+                  <p className="text-sm text-gray-600">{s.tipo}</p>
                 </div>
 
-                <button onClick={() => toggle(s.id)}>
+                <button
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-full transition"
+                  onClick={() => toggle(s.id)}
+                >
                   {abierto === s.id ? "⬆️" : "⬇️"}
                 </button>
               </div>
 
               {abierto === s.id && (
-                <div className="mt-4 border-t pt-4">
-                  <p><strong>Monto:</strong> ${s.monto}</p>
-                  <p><strong>Cuota:</strong> ${s.cuotaEstimada}</p>
-                  <p><strong>Fecha:</strong> {s.fecha}</p>
-                  <p><strong>Documento:</strong> {s.documento}</p>
-                  <p><strong>Correo:</strong> {s.correo}</p>
-                  <p><strong>Teléfono:</strong> {s.telefono}</p>
-                  <p><strong>Ingresos:</strong> {s.ingresos}</p>
+                <div className="mt-4 border-t pt-4 space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Monto</label>
+                    <input
+                      className="border p-2 rounded w-full focus:ring-2 focus:ring-green-500"
+                      defaultValue={s.monto}
+                      onBlur={(e) => actualizarSolicitud(s.id, { monto: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Cuota Estimada</label>
+                    <input
+                      className="border p-2 rounded w-full focus:ring-2 focus:ring-green-500"
+                      defaultValue={s.cuotaEstimada}
+                      onBlur={(e) => actualizarSolicitud(s.id, { cuotaEstimada: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Fecha</label>
+                    <input
+                      className="border p-2 rounded w-full focus:ring-2 focus:ring-green-500"
+                      defaultValue={s.fecha}
+                      onBlur={(e) => actualizarSolicitud(s.id, { fecha: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Correo</label>
+                    <input
+                      className="border p-2 rounded w-full focus:ring-2 focus:ring-green-500"
+                      defaultValue={s.correo}
+                      onBlur={(e) => actualizarSolicitud(s.id, { correo: e.target.value })}
+                    />
+                  </div>
+                  <div className="flex gap-2 mt-4">
+                    <button
+                      className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-full transition"
+                      onClick={() => eliminarSolicitud(s.id)}
+                    >
+                      Eliminar
+                    </button>
+                    <button
+                      className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-full transition"
+                      onClick={() => toggle(s.id)}
+                    >
+                      Guardar
+                    </button>
+                  </div>
                 </div>
               )}
             </li>
